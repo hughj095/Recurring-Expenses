@@ -99,15 +99,19 @@ def classify_columns(df):
         sample = df[col].dropna().astype(str).head(50)
 
         def kw_hit(field):
-            return any(kw in header for kw in HEADER_KEYWORDS[field])
+            # Reward an exact header match (e.g. "Description") over a partial
+            # one (e.g. "Original Description"), which tends to be noisier.
+            if header in HEADER_KEYWORDS[field]:
+                return 2
+            return 1 if any(kw in header for kw in HEADER_KEYWORDS[field]) else 0
 
         scores[col] = {
-            "date": (2 if kw_hit("date") else 0) + _date_parse_ratio(sample) * 3,
-            "description": (2 if kw_hit("description") else 0) + _text_score(sample) * 3,
-            "amount": (2 if kw_hit("amount") else 0) + _numeric_parse_ratio(sample) * 3,
-            "debit": (3 if kw_hit("debit") else 0) + _numeric_parse_ratio(sample),
-            "credit": (3 if kw_hit("credit") else 0) + _numeric_parse_ratio(sample),
-            "type": 3 if kw_hit("type") else 0,
+            "date": kw_hit("date") + _date_parse_ratio(sample) * 3,
+            "description": kw_hit("description") + _text_score(sample) * 3,
+            "amount": kw_hit("amount") + _numeric_parse_ratio(sample) * 3,
+            "debit": kw_hit("debit") * 1.5 + _numeric_parse_ratio(sample),
+            "credit": kw_hit("credit") * 1.5 + _numeric_parse_ratio(sample),
+            "type": kw_hit("type") * 1.5,
         }
         if kw_hit("balance"):
             scores[col]["amount"] *= 0.3  # de-prioritize running balance columns
@@ -158,6 +162,13 @@ def normalize_transactions(df, mapping):
             type_col = df[mapping["type"]].astype(str).str.lower()
             is_expense = type_col.str.contains("debit|withdrawal|dr|out", regex=True)
             amounts = amounts.where(~is_expense, -amounts)
+        else:
+            nonzero = amounts.dropna()
+            nonzero = nonzero[nonzero != 0]
+            if not nonzero.empty and (nonzero > 0).mean() >= 0.85:
+                # Statement lists charges as positive (e.g. credit-card export);
+                # flip so negative consistently means "money out" downstream.
+                amounts = -amounts
     else:
         raise ValueError("Could not identify an amount column in this file.")
 
