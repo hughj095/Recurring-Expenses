@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recurring Expense Finder</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <h1>Recurring Expense Finder</h1>
+      <p>Drop in a bank statement (CSV or Excel) and we'll find your monthly recurring expenses.</p>
+    </header>
+
+    <section id="dropzone" class="dropzone">
+      <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" hidden />
+      <div class="dropzone__content">
+        <p class="dropzone__title">Drag &amp; drop your statement here</p>
+        <p class="dropzone__subtitle">or</p>
+        <button id="browseBtn" class="btn">Browse file</button>
+        <p class="dropzone__filename" id="fileName"></p>
+      </div>
+    </section>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="results" class="results" hidden>
+      <h2>Detected Fields</h2>
+      <ul id="columnMapping" class="mapping-list"></ul>
+
+      <h2>Recurring Monthly Expenses</h2>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Avg. Amount</th>
+            <th>Occurrences</th>
+            <th>Months Seen</th>
+            <th>First Seen</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody id="recurringBody"></tbody>
+      </table>
+      <p id="noRecurring" class="empty-message" hidden>No recurring monthly expenses were detected.</p>
+    </section>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
