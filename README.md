@@ -2,9 +2,10 @@
 Drop a csv or excel file and identify all re-occuring expenses 
 
 ## Live app (Codespace)
-https://cuddly-trout-wqgpv49rjxq396pp-5000.app.github.dev
 
-This is the forwarded port URL for the currently running Codespace instance. The port is set to "Public" visibility, so anyone with the link can use it without logging into GitHub. It's only reachable while the Codespace is running.
+Start the app, then open port `5000` in the VS Code **Ports** panel. Use the forwarded address shown there; Codespaces URLs are specific to the current instance and can change.
+
+Set the port visibility to **Public** if the app needs to be reachable without logging into GitHub.
 
 ## Running locally
 ```
